@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/poster_ch.png" alt="知识注入调研总览" width="100%">
+  <img src="./poster_ch.png" alt="知识注入调研总览" width="100%">
 </p>
 
 > 一个围绕 VLM / MLLM 知识注入与通用能力保持的结构化索引，并补充知识编辑与产业公开路线等相关启发。

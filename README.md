@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/poster_en.png" alt="Awesome Knowledge Injection overview" width="100%">
+  <img src="./poster_en.png" alt="Awesome Knowledge Injection overview" width="100%">
 </p>
 
 > A curated map centered on VLM / MLLM knowledge injection with broad-capability retention, plus related inspirations such as knowledge editing and public industry routes.
