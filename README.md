@@ -63,6 +63,7 @@ Maintenance note: this repository uses Agent-assisted updates. A lightweight upd
 
 ## 🧭 Table of Contents
 
+- [🧩 Task Introduction](#task-introduction)
 - [📊 Benchmark Summary](#benchmark-summary)
 - [🔬 Research Directions](#research-directions)
   - [Direction 1: Training Signals and Data Retention (Distill / Replay)](#direction-distill-replay)

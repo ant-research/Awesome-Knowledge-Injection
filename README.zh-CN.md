@@ -63,6 +63,7 @@
 
 ## 🧭 目录
 
+- [🧩 任务介绍](#task-introduction)
 - [📊 Benchmark 总结](#benchmark-summary)
 - [🔬 调研研究方向](#research-directions)
   - [方向一：训练信号与数据保持（Distill / Replay）](#direction-distill-replay)
