@@ -6,11 +6,11 @@
 
 <p align="center">
   <a href="https://awesome.re"><img src="https://awesome.re/badge.svg" alt="Awesome"></a>
-  <img src="https://img.shields.io/badge/Papers-30%2B-0969da" alt="papers">
+  <img src="https://img.shields.io/badge/Papers-50%2B-0969da" alt="papers">
   <img src="https://img.shields.io/badge/GitHub%20Projects-7%2B-2da44e" alt="github projects">
   <img src="https://img.shields.io/badge/Benchmarks-8%2B-f57c00" alt="benchmarks">
   <img src="https://img.shields.io/badge/Industry%20Systems-8%2B-8250df" alt="industry systems">
-  <img src="https://img.shields.io/badge/Updated-2026--05--13-red" alt="updated">
+  <img src="https://img.shields.io/badge/Updated-2026--05--19-red" alt="updated">
 </p>
 
 <p align="center">
@@ -46,12 +46,12 @@ Current coverage:
 | Dimension | Coverage | Notes |
 | --- | --- | --- |
 | Main method tracks | 4 | `Distill`, `Replay`, `Parameter Regularization`, and `LoRA Isolation` |
-| Core papers | 15+ | directly focused on VLM / MLLM knowledge injection with broad-capability retention |
+| Core papers | 50+ | includes verified entries and Agent-indexed candidates; candidates are explicitly marked in tables |
 | Related inspirations | 2 groups | `LLM upstream methods` and `knowledge editing` |
 | GitHub projects | 7+ | only integration-oriented repos and infrastructure that do not duplicate paper repos |
 | Benchmarks / datasets | 8+ | public resources for knowledge injection, continual learning, and editing evaluation |
 
-Last updated: `2026-05-13`
+Last updated: `2026-05-19`
 
 Maintenance note: this repository uses Agent-assisted updates. A lightweight update Agent periodically revisits arXiv, GitHub, company pages, and public benchmark pages to refresh links, stars, and candidate additions. All automated updates first go into a review-only workspace and only become canonical after human approval. See [MAINTAINER_AGENT.md](./MAINTAINER_AGENT.md).
 
@@ -67,6 +67,13 @@ Maintenance note: this repository uses Agent-assisted updates. A lightweight upd
 - [📊 Benchmark Summary](#benchmark-summary)
 - [🔬 Research Directions](#research-directions)
   - [Direction 1: Training Signals and Data Retention (Distill / Replay)](#direction-distill-replay)
+    - [Distill](#distill)
+    - [Direct MLLM / VLM Multimodal Distillation](#distill-multimodal)
+    - [Online Distill: Loss Design, Token Weighting, and Dense Credit](#distill-online-loss)
+    - [Self Distill: Self-Teacher, Privileged Context, and No-External-Teacher Retention](#distill-self)
+    - [Online Distill + RL / RLVR](#distill-rl)
+    - [Mechanism / Survey / Diagnosis](#distill-mechanism)
+    - [Replay](#replay)
   - [Direction 2: Constrained Parameter-Space Updates (Parameter Regularization)](#direction-parameter-regularization)
   - [Direction 3: Modular Isolation and Local Updates (LoRA Isolation / Knowledge Editing)](#direction-lora-isolation)
   - [Related Inspiration: Knowledge Editing](#knowledge-editing)
@@ -138,7 +145,7 @@ At the moment, the strongest direct public results for `VLM / MLLM knowledge inj
 | `Parameter Regularization` | constrain important parameters, update directions, or low-rank spaces | lightweight, PEFT-friendly, easy to plug into existing training stacks | may under-inject if regularization is too strong; hyperparameter-sensitive | currently the strongest and densest direct public mainline |
 | `LoRA Isolation` | isolate knowledge via separate LoRAs, experts, or routing paths | strong interference control; modular | higher parameter / deployment complexity; routing adds design overhead | few public representatives so far, but the direction is clear |
 
-Except for `Distill`, tables below are sorted chronologically, newest first. In `Distill`, the table is split into `direct VLM / MLLM work` and `LLM upstream inspirations`, with newest-first ordering inside each group. `GitHub / Stars` records only public official repositories; newly added rows use snapshots verifiable around `2026-05-13`, while older rows keep their original snapshots.
+Except for `Distill`, tables below are sorted chronologically, newest first. `Distill` is further split by distillation signal source, loss design, and model type. `Online distill` and `self distill` can overlap, so each paper is filed by its dominant contribution while cross-tags are kept in the position field. `GitHub / Stars` records only public official repositories; newly added rows use snapshots verifiable around `2026-05-19`, while older rows keep their original snapshots.
 
 <a id="direction-distill-replay"></a>
 
@@ -148,31 +155,116 @@ Except for `Distill`, tables below are sorted chronologically, newest first. In 
 
 #### Distill
 
-This remains a mainline category for the target problem. To avoid turning it into a purely `LLM` branch, the table below first lists direct `VLM / MLLM` work, then `LLM` upstream inspirations.
+This remains a mainline category for the target problem. Based on the `2026-05-18` Agent discovery run, the four-way split proposed by the user is mostly valid, but this README uses five buckets: `direct MLLM / VLM multimodal distillation`, `Online Distill: loss and token weighting`, `Self Distill: self-teacher / privileged context`, `Online Distill + RL / RLVR`, and `Mechanism / Survey / Diagnosis`. The reason is that `online distill` describes training on the student's on-policy trajectories, while `self distill` describes whether the teacher comes from the same model; the two axes can overlap.
 
-| Time | Position | Paper | Approach | Model type | Experimental task | Primary datasets / benchmarks | GitHub | Stars | Venue | Year |
-| --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- | --- |
-| 2026-05 | direct / Video-LLM self-distillation | [VISD: Enhancing Video Reasoning via Structured Self-Distillation](https://arxiv.org/abs/2605.06094) | uses a video-aware judge to produce structured feedback, then combines sparse rewards with token-level self-distillation through direction-magnitude decoupling | VLM / Video-LLM | video reasoning, spatio-temporal grounding, training efficiency | diverse video reasoning benchmarks | - | - | arXiv | 2026 |
-| 2026-04 | direct / multimodal black-box OPD | [Beyond SFT-to-RL: Pre-alignment via Black-Box On-Policy Distillation for Multimodal RL](https://arxiv.org/abs/2604.28123) | inserts response-level black-box OPD / pre-alignment between SFT and RLVR, using MoE discriminators to separate perception and reasoning drift | VLM / MLLM | multimodal RLVR, visual grounding, reasoning retention | Qwen3-VL 4B / 8B, 1.26M public demos + 113K Gemini 3 Flash demonstrations, diverse multimodal benchmarks | [XIAO4579/PRISM](https://github.com/XIAO4579/PRISM) | 70 | arXiv | 2026 |
-| 2026-03 | direct / VLM distillation | [Uncertainty-Aware Knowledge Distillation for Multimodal Large Language Models (Beta-KD)](https://arxiv.org/abs/2603.21426) | beta-distribution weighted distillation driven by teacher uncertainty | VLM / MLLM | MLLM compression, capability transfer | GQA / ScienceQA-IMG / TextVQA / POPE / MME-P / MMBench-dev | [Jingchensun/beta-kd](https://github.com/Jingchensun/beta-kd) | 3 | CVPR 2026 | 2026 |
-| 2025-03 | direct / VLM distillation | [Enhancing Multi-hop Reasoning in Vision-Language Models via Self-Distillation with Multi-Prompt Ensembling](https://arxiv.org/abs/2503.01754) | multi-prompt ensembling plus self-distillation to compress stronger reasoning traces back into the student | VLM / MLLM | multi-hop visual reasoning, VQA | 5 VQA benchmarks | - | - | arXiv | 2025 |
-| 2024-09 | direct / VLM continual learning | [Adapt without Forgetting: Distill Proximity from Dual Teachers in Vision-Language Models](https://www.ecva.net/papers/eccv_2024/papers_ECCV/html/7052_ECCV_2024_paper.php) | dual-teacher proximity distillation with graph modeling for new-task adaptation and zero-shot retention | VLM | continual learning, zero-shot transfer retention | MTIL + CIFAR100 / TinyImageNet | [myz-ah/AwoForget](https://github.com/myz-ah/AwoForget) | - | ECCV 2024 | 2024 |
-| 2024-09 | direct / VLM continual learning | [Select and Distill: Selective Dual-Teacher Knowledge Transfer for Continual Learning on Vision-Language Models](https://www.ecva.net/papers/eccv_2024/papers_ECCV/html/7626_ECCV_2024_paper.php) | selective dual-teacher transfer that separates what should be preserved from what should adapt | VLM | continual learning, zero-shot retention | FGVCAircraft / DTD / EuroSAT / Flowers102 / Food101 / OxfordPets / StanfordCars / UCF101 / ImageNet | [chu0802/SnD](https://github.com/chu0802/SnD) | 16 | ECCV 2024 | 2024 |
-| 2024-07 | direct / MLLM distillation | [LLAVADI: What Matters For Multimodal Large Language Models Distillation](https://arxiv.org/abs/2407.19409) | combined feature distillation, logit distillation, and teacher-generated data to analyze key MLLM distillation factors | VLM / MLLM | MLLM compression, instruction-following retention | CC-595K / LLaVA-665K + GQA / ScienceQA-IMG / TextVQA / POPE / MME-P / MMBench-dev | - | - | arXiv | 2024 |
-| 2023-12 | direct / VLM distillation | [Visual Program Distillation](https://openaccess.thecvf.com/content/CVPR2024/html/Hao_Visual_Program_Distillation_OFDistilling_Tools_and_Programmatic_Reasoning_into_Vision-Language_CVPR_2024_paper.html) | distills LLM-generated programs and tool-use reasoning into a VLM | VLM / MLLM | compositional visual reasoning, factuality, robustness | MMBench / OK-VQA / A-OKVQA / TallyQA / POPE / Hateful Memes | - | - | CVPR 2024 | 2023 |
-| 2023-10 | direct / VLM continual learning | [Multi-Domain Lifelong Visual Question Answering via Self-Critical Distillation](https://dl.acm.org/doi/10.1145/3581783.3612274) | replay-free self-critical distillation over logits and intermediate features | VLM | multi-domain lifelong VQA, forgetting mitigation | CLEVR / GQA / VizWiz / AQUA / VQA-Abstract | - | - | ACM MM 2023 | 2023 |
-| 2026-04 | survey inspiration | [A Survey of On-Policy Distillation for Large Language Models](https://arxiv.org/abs/2604.00626) | OPD survey | LLM | survey rather than a single experimental task | - | - | - | arXiv | 2026 |
-| 2026-04 | LLM upstream inspiration | [Rethinking On-Policy Distillation of Large Language Models: Phenomenology, Mechanism, and Recipe](https://arxiv.org/abs/2604.13016) | re-examines OPD through phenomenology, mechanism, and recipe design | LLM | mechanism analysis and training-recipe synthesis for OPD | OPD training and evaluation settings | - | - | arXiv | 2026 |
-| 2026-04 | LLM upstream inspiration | [Self-Distillation as a Performance Recovery Mechanism for LLMs](https://arxiv.org/abs/2604.15794) | uses SDFT to recover performance after SFT / quantization / pruning, with CKA-based analysis of hidden-state manifold alignment | LLM | performance recovery, catastrophic-forgetting mitigation, post-compression recovery | recovery evaluations after SFT / quantization / pruning | - | - | arXiv | 2026 |
-| 2026-04 | LLM upstream inspiration | [Unifying Group-Relative and Self-Distillation Policy Optimization via Sample Routing](https://arxiv.org/abs/2604.02288) | unifies GRPO and self-distillation within a sample-routing framework | LLM | verifiable reasoning, RLVR | 5 reasoning benchmarks | - | - | arXiv | 2026 |
-| 2026-04 | LLM upstream inspiration | [Self-Distilled RLVR: Improving Reasoning by Reinforcement Learning via Self-Distillation](https://arxiv.org/abs/2604.03128) | injects self-distillation into RLVR to reduce rollout variance and stabilize reasoning gains | LLM | mathematical reasoning, RLVR | RLVR reasoning benchmarks | - | - | arXiv | 2026 |
-| 2026-04 | LLM upstream inspiration | [SODA](https://arxiv.org/abs/2604.03873) | semi on-policy distillation for restricted-teacher settings | LLM | distillation with black-box or restricted teacher access | semi on-policy distillation benchmarks | - | - | arXiv | 2026 |
-| 2026-03 | LLM upstream inspiration | [HEAL](https://arxiv.org/abs/2603.10359) | hindsight- and entropy-aware trajectory quality weighting | LLM | online distillation, generative learning | generative distillation / reasoning benchmarks | - | - | arXiv | 2026 |
-| 2026-03 | LLM upstream inspiration | [Revisiting On-Policy Distillation: Empirical Failure Modes and Simple Fixes](https://arxiv.org/abs/2603.25562) | analyzes sampled-token OPD failures under long rollouts, teacher-prefix drift, and tokenizer mismatch, then proposes teacher top-K local support matching | LLM | OPD failure-mode analysis, reasoning / agent multi-task training | single-task reasoning and multi-task agent / reasoning benchmarks | - | - | arXiv | 2026 |
-| 2026-01 | LLM upstream inspiration | [Self-Distilled Reasoner: On-Policy Self-Distillation for Large Language Models](https://arxiv.org/abs/2601.18734) | cold-starts chain-of-thought and then improves reasoning through iterative self-distillation | LLM | mathematical reasoning, verifiable reasoning training | AIME24 / AIME25 / HMMT25 | [siyan-zhao/OPSD](https://github.com/siyan-zhao/OPSD) | 107 | arXiv | 2026 |
-| 2026-01 | LLM upstream inspiration | [Self-Distillation Enables Continual Learning](https://arxiv.org/abs/2601.19897) | privileged-context self-distillation | LLM | continual learning, domain adaptation | continual learning task sequences | - | - | arXiv | 2026 |
-| 2023-06 | LLM upstream inspiration | [GKD](https://arxiv.org/abs/2306.13649) | student-generated trajectory distillation | LLM | instruction following, generative distillation | instruction data, generation evaluation | - | - | arXiv | 2023 |
-| 2023-06 | LLM upstream inspiration | [MiniLLM](https://arxiv.org/abs/2306.08543) | generative reverse-KL on-policy distillation | LLM | text generation, instruction following | MT-Bench / AlpacaEval / instruction data | - | - | arXiv | 2023 |
+| Subcategory | Filing criterion | Common training signals / losses | Relevance to knowledge injection and retention |
+| --- | --- | --- | --- |
+| `Direct MLLM / VLM multimodal distillation` | the experimental target is directly VLM / MLLM / Video-LLM | logit distillation, feature distillation, visual-token distillation, cross-modal token interaction, structured video feedback | closest to the repository's main problem; highest priority |
+| `Online Distill: loss and token weighting` | the student learns on its own generated trajectories with dense teacher / verifier / rubric supervision | KL / reverse-KL, sampled-token NLL, top-K support matching, token-importance weighting, teacher-uncertainty weighting, control variates | directly informs how to constrain output distribution drift during knowledge injection |
+| `Self Distill: self-teacher / privileged context` | teacher and student share the same base model; the teacher receives reference answers, feedback, harnesses, or other privileged context | privileged-context KL, logit steering, reward-regularized KL, reflection-enhanced feedback, teacher-exposure scheduling | useful when no strong external teacher is available, but can reinforce the model's own errors |
+| `Online Distill + RL / RLVR` | combines sparse reward / GRPO / RLVR with dense distillation signals | advantage / reward weighted distillation, sample routing, post-RL compaction, dense credit assignment | highly relevant for the target setting: sparse reward defines the new target, distillation stabilizes behavior |
+| `Mechanism / Survey / Diagnosis` | main contribution explains when OPD / OPSD works or fails | failure modes, teacher-prefix drift, tokenizer mismatch, teachability collapse, capability-loss accounting | helps decide whether LLM recipes should be transferred to MLLMs |
+
+<a id="distill-multimodal"></a>
+
+##### Direct MLLM / VLM Multimodal Distillation
+
+| Time | Position | Paper | Approach / Loss design | Model type | Task / datasets | Code / Stars | Venue / status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-05 | Video-LLM self-distillation + RL signal | [VISD: Enhancing Video Reasoning via Structured Self-Distillation](https://arxiv.org/abs/2605.06094) | video-aware judge generates structured feedback; sparse rewards are combined with token-level self-distillation | VLM / Video-LLM | video reasoning, spatio-temporal grounding; diverse video reasoning benchmarks | - | arXiv / recorded |
+| 2026-05 | VLM cascaded KD | [LLaVA-CKD: Bottom-Up Cascaded Knowledge Distillation for Vision-Language Models](https://arxiv.org/abs/2605.10641) | bottom-up cascaded KD for staged VLM capability compression | VLM | VQA and vision-language understanding | - | arXiv / indexed candidate |
+| 2026-04 | multimodal black-box OPD | [Beyond SFT-to-RL: Pre-alignment via Black-Box On-Policy Distillation for Multimodal RL](https://arxiv.org/abs/2604.28123) | inserts response-level black-box OPD between SFT and RLVR; MoE discriminators separate perception and reasoning drift | VLM / MLLM | multimodal RLVR, visual grounding, reasoning retention; Qwen3-VL 4B / 8B, 1.26M public demos + 113K Gemini 3 Flash demonstrations | [XIAO4579/PRISM](https://github.com/XIAO4579/PRISM) / 70 | arXiv / recorded |
+| 2026-03 | uncertainty-aware MLLM KD | [Uncertainty-Aware Knowledge Distillation for Multimodal Large Language Models (Beta-KD)](https://arxiv.org/abs/2603.21426) | beta-distribution weighting balances data supervision and teacher supervision according to teacher uncertainty | VLM / MLLM | MLLM compression and transfer; GQA / ScienceQA-IMG / TextVQA / POPE / MME-P / MMBench-dev | [Jingchensun/beta-kd](https://github.com/Jingchensun/beta-kd) / 3 | CVPR 2026 / recorded |
+| 2026-02 | multimodal token-interaction KD | [Beyond Next-Token Alignment: Distilling Multimodal Large Language Models via Token Interactions](https://arxiv.org/abs/2602.09483) | explicitly models cross-modal token interactions rather than only next-token alignment | VLM / MLLM | MLLM compression and cross-modal retention | - | arXiv / indexed candidate |
+| 2025-12 | VLM long-window KD | [Towards Long-window Anchoring in Vision-Language Model Distillation](https://arxiv.org/abs/2512.21576) | long-window anchoring addresses limited student context windows under VLM distillation | VLM | long-context vision-language understanding | - | AAAI 2026 / indexed candidate |
+| 2025-12 | masked teacher + reinforced student | [Masking Teacher and Reinforcing Student for Distilling Vision-Language Models](https://arxiv.org/abs/2512.22238) | masks teacher signals and reinforces the student for compact VLM distillation | VLM | lightweight VLM deployment | - | arXiv / indexed candidate |
+| 2025-11 | unbalanced visual-token KD | [EM-KD: Distilling Efficient Multimodal Large Language Model with Unbalanced Vision Tokens](https://arxiv.org/abs/2511.21106) | KD for efficient MLLMs under unbalanced visual tokens | VLM / MLLM | MLLM compression, visual-information retention | - | AAAI 2026 / indexed candidate |
+| 2025-11 | CLIP / VQA KD diagnosis | [When Better Teachers Don't Make Better Students](https://arxiv.org/abs/2511.17886) | analyzes why stronger teachers do not always produce stronger multimodal students | VLM / CLIP | VQA, CLIP distillation | - | arXiv / indexed candidate |
+| 2025-03 | multi-prompt self-distillation | [Enhancing Multi-hop Reasoning in Vision-Language Models via Self-Distillation with Multi-Prompt Ensembling](https://arxiv.org/abs/2503.01754) | multi-prompt ensembling plus self-distillation compresses stronger reasoning traces back into the student | VLM / MLLM | multi-hop visual reasoning, VQA; 5 VQA benchmarks | - | arXiv / recorded |
+| 2024-09 | VLM continual dual-teacher KD | [Adapt without Forgetting](https://www.ecva.net/papers/eccv_2024/papers_ECCV/html/7052_ECCV_2024_paper.php) | dual-teacher proximity distillation with graph modeling for new-task adaptation and zero-shot retention | VLM | continual learning, zero-shot retention; MTIL + CIFAR100 / TinyImageNet | [myz-ah/AwoForget](https://github.com/myz-ah/AwoForget) / - | ECCV 2024 / recorded |
+| 2024-09 | selective dual-teacher KD | [Select and Distill](https://www.ecva.net/papers/eccv_2024/papers_ECCV/html/7626_ECCV_2024_paper.php) | selective dual-teacher transfer separates what to preserve from what to adapt | VLM | FGVCAircraft / DTD / EuroSAT / Flowers102 / Food101 / OxfordPets / StanfordCars / UCF101 / ImageNet | [chu0802/SnD](https://github.com/chu0802/SnD) / 16 | ECCV 2024 / recorded |
+| 2024-07 | MLLM KD factor analysis | [LLAVADI](https://arxiv.org/abs/2407.19409) | combines feature distillation, logit distillation, and teacher-generated data | VLM / MLLM | CC-595K / LLaVA-665K + GQA / ScienceQA-IMG / TextVQA / POPE / MME-P / MMBench-dev | - | arXiv / recorded |
+| 2023-12 | visual program distillation | [Visual Program Distillation](https://openaccess.thecvf.com/content/CVPR2024/html/Hao_Visual_Program_Distillation_OFDistilling_Tools_and_Programmatic_Reasoning_into_Vision-Language_CVPR_2024_paper.html) | distills LLM-generated programs and tool-use reasoning into a VLM | VLM / MLLM | MMBench / OK-VQA / A-OKVQA / TallyQA / POPE / Hateful Memes | - | CVPR 2024 / recorded |
+| 2023-10 | lifelong multi-domain VQA | [Multi-Domain Lifelong Visual Question Answering via Self-Critical Distillation](https://dl.acm.org/doi/10.1145/3581783.3612274) | replay-free self-critical distillation over logits and intermediate representations | VLM | CLEVR / GQA / VizWiz / AQUA / VQA-Abstract | - | ACM MM 2023 / recorded |
+
+<a id="distill-online-loss"></a>
+
+##### Online Distill: Loss Design, Token Weighting, and Dense Credit
+
+| Time | Position | Paper | Approach / Loss design | Model type | Task / datasets | Code / Stars | Venue / status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-05 | neighboring token-weighting inspiration | [InfoSFT](https://arxiv.org/abs/2605.14967) | information-aware token weighting makes SFT learn more and forget less; not strict OPD, but useful for loss-weighting design | LLM | SFT / forgetting mitigation | - | arXiv / indexed candidate |
+| 2026-05 | token-level self-uncertainty weighting | [Respecting Self-Uncertainty in On-Policy Self-Distillation](https://arxiv.org/abs/2605.13255) | weights teacher token signals by self-uncertainty instead of using uniform token supervision | LLM | reasoning post-training | - | arXiv / indexed candidate |
+| 2026-05 | prefix / suffix teachability diagnosis | [Prefix Teach, Suffix Fade](https://arxiv.org/abs/2605.13643) | shows suffix-token teaching signal can collapse in strong-to-weak OPD | LLM | structured output / reasoning | - | arXiv / indexed candidate |
+| 2026-05 | multi-rollout peer supervision | [Multi-Rollout On-Policy Distillation](https://arxiv.org/abs/2605.12652) | uses peer successes and failures across rollouts for finer token supervision | LLM | verifier-based reasoning | - | arXiv / indexed candidate |
+| 2026-05 | token-routed self-OPD | [TRACE](https://arxiv.org/abs/2605.10194) | avoids all-token KL waste by routing supervision to important tokens | LLM | RLVR / reasoning alignment | - | arXiv / indexed candidate |
+| 2026-05 | best-of-N teacher rollout | [On-Policy Distillation with Best-of-N Teacher Rollout Selection](https://arxiv.org/abs/2605.09725) | selects better teacher rollouts before distillation to reduce noisy teacher signals | LLM | reasoning post-training | - | arXiv / indexed candidate |
+| 2026-05 | rock-token analysis | [Cornerstones or Stumbling Blocks?](https://arxiv.org/abs/2605.09253) | analyzes how a small set of critical tokens drives or harms OPD learning | LLM | reasoning / token-level credit | - | arXiv / indexed candidate |
+| 2026-05 | rubric-based OPD | [Rubric-based On-policy Distillation](https://arxiv.org/abs/2605.07396) | uses structured semantic rubrics instead of white-box teacher logits | LLM | alignment / reasoning | - | arXiv / indexed candidate |
+| 2026-05 | control-variate KL | [KL for a KL](https://arxiv.org/abs/2605.07865) | uses a control-variate baseline to reduce single-sample OPD gradient variance | LLM | reasoning post-training | - | arXiv / indexed candidate |
+| 2026-05 | step-wise OPD | [SOD](https://arxiv.org/abs/2605.07725) | decomposes sparse trajectory supervision into step-wise distillation for small agent models | LLM / Agent | tool-integrated reasoning | - | arXiv / indexed candidate |
+| 2026-05 | cross-tokenizer OPD | [SimCT](https://arxiv.org/abs/2605.07711) | recovers supervision lost when teacher and student tokenizers differ | LLM | cross-tokenizer distillation | - | arXiv / indexed candidate |
+| 2026-05 | long-horizon pruning | [Prune-OPD](https://arxiv.org/abs/2605.07804) | prunes low-value or drifted distillation signals in long-horizon reasoning to improve OPD reliability | LLM | long-horizon reasoning | - | arXiv / indexed candidate |
+| 2026-05 | multi-agent debate teacher | [MAD-OPD](https://arxiv.org/abs/2605.01347) | uses multi-agent debate to produce stronger token-level teacher supervision and break the single-teacher ceiling | LLM / Agent | agentic reasoning | - | arXiv / indexed candidate |
+| 2026-04 | dual-path adaptive weighting | [SCOPE](https://arxiv.org/abs/2604.10688) | signal-calibrated OPD enhancement with dual-path adaptive weighting | LLM | reasoning alignment | - | arXiv / indexed candidate |
+| 2026-04 | temporal curriculum | [TCOD](https://arxiv.org/abs/2604.24005) | adds temporal curriculum to multi-turn agent OPD to reduce long-horizon error accumulation | LLM / Agent | multi-turn autonomous agents | - | arXiv / indexed candidate |
+| 2026-04 | token importance | [TIP: Token Importance in On-Policy Distillation](https://arxiv.org/abs/2604.14084) | directly studies which tokens carry useful OPD learning signal | LLM | online KD / reasoning | - | arXiv / indexed candidate |
+| 2026-03 | frontier-of-competence sampling | [PACED](https://arxiv.org/abs/2603.11178) | focuses distillation / self-distillation on problems near the student's competence frontier | LLM | LLM distillation efficiency | - | arXiv / indexed candidate |
+| 2026-03 | OPD failure fixes | [Revisiting On-Policy Distillation](https://arxiv.org/abs/2603.25562) | identifies long-rollout, teacher-prefix drift, and tokenizer-mismatch failures; proposes top-K local support matching | LLM | reasoning / agent multi-task training | - | arXiv / recorded |
+| 2026-03 | hindsight + entropy weighting | [HEAL](https://arxiv.org/abs/2603.10359) | weights trajectory quality using hindsight information and teacher entropy | LLM | online distillation / reasoning | - | arXiv / recorded |
+| 2026-02 | context distillation | [On-Policy Context Distillation for Language Models](https://arxiv.org/abs/2602.12275) | internalizes in-context knowledge into parameters by connecting context distillation with on-policy distillation | LLM | context distillation / knowledge internalization | - | arXiv / indexed candidate |
+| 2023-06 | generative online distillation | [GKD](https://arxiv.org/abs/2306.13649) / [MiniLLM](https://arxiv.org/abs/2306.08543) | student-generated trajectory distillation; MiniLLM uses reverse-KL for generative students | LLM | instruction following, text generation; MT-Bench / AlpacaEval / instruction data | - | arXiv / recorded |
+
+<a id="distill-self"></a>
+
+##### Self Distill: Self-Teacher, Privileged Context, and No-External-Teacher Retention
+
+| Time | Position | Paper | Approach / Loss design | Model type | Task / datasets | Code / Stars | Venue / status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-05 | unified self-distillation | [UniSD](https://arxiv.org/abs/2605.06597) | studies self-generated trajectory reliability, representation alignment, and training stability in one framework | LLM | LLM adaptation / reasoning | - | arXiv / indexed candidate |
+| 2026-05 | preference-based self-distillation | [Preference-Based Self-Distillation](https://arxiv.org/abs/2605.05040) | adds reward regularization beyond KL matching to stabilize self-distillation | LLM | reasoning post-training | - | arXiv / indexed candidate |
+| 2026-05 | outcome-guided logit steering | [OGLS-SD](https://arxiv.org/abs/2605.12400) | uses outcome-guided logit steering to correct over-alignment in OPSD | LLM | LLM reasoning | - | arXiv / indexed candidate |
+| 2026-05 | teacher-exposure scheduling | [Adaptive Teacher Exposure](https://arxiv.org/abs/2605.11458) | tunes privileged-teacher exposure to reduce teacher dependence | LLM | LLM reasoning | - | arXiv / indexed candidate |
+| 2026-05 | input-specific credit | [From Generic Correlation to Input-Specific Credit](https://arxiv.org/abs/2605.11613) | moves from generic correlation to input-specific credit assignment | LLM | post-training / reasoning | - | arXiv / indexed candidate |
+| 2026-05 | reflection-enhanced self-distillation | [Learning with Rare Success but Rich Feedback](https://arxiv.org/abs/2605.12741) | uses environmental feedback and reflection to strengthen self-distillation when successes are rare but feedback is rich | LLM | interactive / feedback learning | - | arXiv / indexed candidate |
+| 2026-05 | harness self-distillation | [Training with Harnesses](https://arxiv.org/abs/2605.08741) | distills inference-time harness capabilities back into the base model | LLM | complex reasoning | - | arXiv / indexed candidate |
+| 2026-05 | multilingual safety self-distill | [Multilingual Safety Alignment via Self-Distillation](https://arxiv.org/abs/2605.02971) | transfers high-resource-language safety ability to low-resource languages through self-distillation | LLM | multilingual safety alignment | - | arXiv / indexed candidate |
+| 2026-04 | performance-recovery self-distillation | [Self-Distillation as a Performance Recovery Mechanism for LLMs](https://arxiv.org/abs/2604.15794) | uses SDFT to recover after SFT / quantization / pruning and analyzes manifold alignment with CKA | LLM | performance recovery / forgetting mitigation | - | arXiv / recorded |
+| 2026-01 | OPSD | [Self-Distilled Reasoner](https://arxiv.org/abs/2601.18734) | cold-starts CoT and iteratively distills from the same model under privileged context | LLM | math reasoning; AIME24 / AIME25 / HMMT25 | [siyan-zhao/OPSD](https://github.com/siyan-zhao/OPSD) / 107 | arXiv / recorded |
+| 2026-01 | continual-learning self-distillation | [Self-Distillation Enables Continual Learning](https://arxiv.org/abs/2601.19897) | teacher uses demonstrations / privileged context while student sees normal inputs; KL preserves old behavior while learning new tasks | LLM | continual learning, domain adaptation; sequential task streams | - | arXiv / recorded |
+
+<a id="distill-rl"></a>
+
+##### Online Distill + RL / RLVR: Sparse Rewards with Dense Distillation
+
+| Time | Position | Paper | Approach / Loss design | Model type | Task / datasets | Code / Stars | Venue / status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-05 | language feedback + variational PD | [Learning from Language Feedback via Variational Policy Distillation](https://arxiv.org/abs/2605.15113) | turns language feedback into variational policy distillation to reduce RLVR exploration bottlenecks | LLM | verifiable reasoning | - | arXiv / indexed candidate |
+| 2026-05 | agentic RL + OPSD | [Self-Distilled Agentic Reinforcement Learning](https://arxiv.org/abs/2605.15155) | uses OPSD to provide dense trajectory supervision for long-horizon agent RL | LLM / Agent | long-horizon agent interaction | - | arXiv / indexed candidate |
+| 2026-05 | agent advantage reweighting | [GEAR](https://arxiv.org/abs/2605.11853) | converts outcome-level reward into finer supervision with granularity-adaptive advantage reweighting | LLM / Agent | agent post-training | - | arXiv / indexed candidate |
+| 2026-05 | self-distilled RLVR exploration | [Rebellious Student](https://arxiv.org/abs/2605.10781) | reverses selected teacher signals in self-distilled RLVR to encourage exploration | LLM | reasoning RLVR | - | arXiv / indexed candidate |
+| 2026-05 | on-policy optimization + distillation | [Combining On-Policy Optimization and Distillation for Long-Context Reasoning](https://arxiv.org/abs/2605.12227) | combines on-policy optimization and distillation for stable long-context reasoning | LLM | long-context reasoning | - | arXiv / indexed candidate |
+| 2026-05 | sparse-to-dense reward principle | [Beyond GRPO and On-Policy Distillation](https://arxiv.org/abs/2605.12483) | compares how sparse GRPO rewards and dense OPD rewards should allocate checked examples | LLM | language-model post-training | - | arXiv / indexed candidate |
+| 2026-05 | reward-weighted OPD | [Reward-Weighted On-Policy Distillation](https://arxiv.org/abs/2605.13501) | uses verifier signals to drive reward-weighted OPD | LLM | NL-to-SVA generation | - | arXiv / indexed candidate |
+| 2026-05 | post-RL compaction | [OPSD Compresses What RLVR Teaches](https://arxiv.org/abs/2605.06188) | uses OPSD as a post-RL compaction stage, while noting weaker gains in long-thinking settings | LLM | reasoning models / RLVR compaction | - | arXiv / indexed candidate |
+| 2026-05 | anti-self-distillation | [Anti-Self-Distillation for Reasoning RL via Pointwise Mutual Information](https://arxiv.org/abs/2605.11609) | uses PMI to identify and reverse self-distillation signals that may lock in bad reasoning behavior | LLM | reasoning RL | - | arXiv / indexed candidate |
+| 2026-04 | co-evolving policy distillation | [Co-Evolving Policy Distillation](https://arxiv.org/abs/2604.27083) | introduces OPD during each expert's RLVR training instead of after expert training is complete | LLM | multi-expert capability consolidation | - | arXiv / indexed candidate |
+| 2026-04 | RLVR + self-distillation | [Self-Distilled RLVR](https://arxiv.org/abs/2604.03128) | adds self-distillation to RLVR to reduce rollout variance and stabilize reasoning gains | LLM | math reasoning, RLVR | - | arXiv / recorded |
+| 2026-04 | unified GRPO + self-distill | [SRPO](https://arxiv.org/abs/2604.02288) | unifies GRPO and self-distillation policy optimization through sample routing | LLM | verifiable reasoning; 5 reasoning benchmarks | - | arXiv / recorded |
+
+<a id="distill-mechanism"></a>
+
+##### Mechanism / Survey / Diagnosis
+
+| Time | Position | Paper | Main finding | Model type | Task / datasets | Code / Stars | Venue / status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-05 | OPD applicability analysis | [Unmasking On-Policy Distillation](https://arxiv.org/abs/2605.10889) | analyzes when OPD helps and when it hurts training | LLM | reasoning post-training | - | arXiv / indexed candidate |
+| 2026-05 | OPD / OPSD mechanism map | [The Many Faces of On-Policy Distillation](https://arxiv.org/abs/2605.11182) | summarizes OPD / OPSD mechanisms, pitfalls, and fixes | LLM | reasoning / post-training | - | arXiv / indexed candidate |
+| 2026-05 | OPD extrapolation risk | [The Extrapolation Cliff in On-Policy Distillation](https://arxiv.org/abs/2605.08737) | shows excessive reward extrapolation can break near-deterministic structured-output contracts | LLM | structured output | - | arXiv / indexed candidate |
+| 2026-05 | unified OPD recipe | [Uni-OPD](https://arxiv.org/abs/2605.03677) | offers a dual-perspective OPD recipe and discusses reliability conditions | LLM | expert capability consolidation | - | arXiv / indexed candidate |
+| 2026-04 | loss-accounting position paper | [Knowledge Distillation Must Account for What It Loses](https://arxiv.org/abs/2604.25110) | argues distillation evaluation should track teacher capabilities lost by the student, not only task scores | LLM | distillation evaluation | - | arXiv / indexed candidate |
+| 2026-04 | OPD survey | [A Survey of On-Policy Distillation for Large Language Models](https://arxiv.org/abs/2604.00626) | organizes OPD definitions, variants, use cases, and risks | LLM | survey | - | arXiv / recorded |
+| 2026-04 | OPD mechanism analysis | [Rethinking On-Policy Distillation of Large Language Models](https://arxiv.org/abs/2604.13016) | explains OPD from phenomenology, mechanism, and training recipe perspectives | LLM | OPD training / evaluation | - | arXiv / recorded |
 
 <a id="replay"></a>
 
